@@ -1,0 +1,3 @@
+include ':glcardrender'
+include ':app'
+rootProject.name = "GLCardRender"
