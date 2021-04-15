@@ -1,21 +1,13 @@
 package com.aaudin90.glcardrender
 
+import android.opengl.GLES20
 import android.opengl.GLES30
 import android.util.Log
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
 
-/**
- * Created by Seker on 7/2/2015.
- *
- *
- * This code actually will draw a cube.
- *
- * Some of the code is used from https://github.com/christopherperry/cube-rotation
- * and changed up to opengl 3.0
- */
-class Cube {
+class Cube(private val texture: Int) {
     private val mProgramObject: Int
     private var mMVPMatrixHandle = 0
     private var mColorHandle = 0
@@ -134,6 +126,10 @@ class Cube {
         mColorHandle = GLES30.glGetUniformLocation(mProgramObject, "vColor")
 
 
+        // помещаем текстуру в target 2D юнита 0
+        GLES30.glActiveTexture(GLES20.GL_TEXTURE0)
+        GLES30.glBindTexture(GLES20.GL_TEXTURE_2D, texture)
+
         // Apply the projection and view transformation
         GLES30.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0)
         CardRenderer.checkGlError("glUniformMatrix4fv")
@@ -204,7 +200,6 @@ class Cube {
         // Create the program object
         val programObject = GLES30.glCreateProgram()
         if (programObject == 0) {
-            Log.e("sssss", "So some kind of error, but what?")
             throw Exception("programObject == 0")
         }
         GLES30.glAttachShader(programObject, vertexShader)

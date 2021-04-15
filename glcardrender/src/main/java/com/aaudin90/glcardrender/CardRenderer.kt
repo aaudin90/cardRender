@@ -1,16 +1,19 @@
 package com.aaudin90.glcardrender
 
 import android.content.Context
+import android.opengl.GLES20
 import android.opengl.GLES30
 import android.opengl.GLSurfaceView
 import android.opengl.Matrix
 import android.util.Log
+import com.aaudin90.glcardrender.api.CardModelLoader
+import com.aaudin90.glcardrender.internal.entity.Data3D
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
-class CardRenderer(context: Context?) : GLSurfaceView.Renderer {
-    private var mWidth = 0
-    private var mHeight = 0
+internal class CardRenderer(private val context: Context) : GLSurfaceView.Renderer {
+    private var width = 0
+    private var height = 0
     private lateinit var mCube: Cube
     private var mAngle = 0f
 
@@ -20,22 +23,36 @@ class CardRenderer(context: Context?) : GLSurfaceView.Renderer {
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private val mMVPMatrix = FloatArray(16)
-    private val mProjectionMatrix = FloatArray(16)
+    private val projectionMatrix = FloatArray(16)
     private val mViewMatrix = FloatArray(16)
     private val mRotationMatrix = FloatArray(16)
+
+    var cardModelLoader: CardModelLoader? = null
+    private var currentObject: Data3D? = null
 
     ///
     // Initialize the shader and program object
     //
     override fun onSurfaceCreated(glUnused: GL10, config: EGLConfig) {
 
+        // Set the background frame color
 
-        //set the clear buffer color to light gray.
-        //GLES30.glClearColor(0.9f, .9f, 0.9f, 0.9f);
-        //set the clear buffer color to a dark grey.
-        GLES30.glClearColor(0.1f, .1f, 0.1f, 0.9f)
+        // Set the background frame color
+        GLES30.glClearColor(
+            backgroundColor[0],
+            backgroundColor[1],
+            backgroundColor[2],
+            backgroundColor[3]
+        )
+
+        GLES30.glEnable(GLES20.GL_DEPTH_TEST)
+
+        // Enable not drawing out of view port
+
+        // Enable not drawing out of view port
+        GLES30.glEnable(GLES20.GL_SCISSOR_TEST)
         //initialize the cube code for drawing.
-        mCube = Cube()
+        mCube = Cube(0)
         //if we had other objects setup them up here as well.
     }
 
@@ -43,6 +60,12 @@ class CardRenderer(context: Context?) : GLSurfaceView.Renderer {
     // Draw a triangle using the shader pair created in onSurfaceCreated()
     //
     override fun onDrawFrame(glUnused: GL10) {
+        cardModelLoader?.also {
+            currentObject = it.getData3D()
+        }
+
+        GLES20.glViewport(0, 0, width, height)
+        GLES20.glScissor(0, 0, width, height)
 
         // Clear the color buffer  set above by glClearColor.
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
@@ -60,39 +83,38 @@ class CardRenderer(context: Context?) : GLSurfaceView.Renderer {
         Matrix.translateM(mRotationMatrix, 0, x, y, 0f)
 
         //mangle is how fast, x,y,z which directions it rotates.
-        Matrix.rotateM(mRotationMatrix, 0, mAngle, 1.0f, 1.0f, 1.0f)
+        Matrix.rotateM(mRotationMatrix, 0, mAngle, 0.0f, 1.0f, 0.0f)
 
         // combine the model with the view matrix
         Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mRotationMatrix, 0)
 
         // combine the model-view with the projection matrix
-        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0)
+        Matrix.multiplyMM(mMVPMatrix, 0, projectionMatrix, 0, mMVPMatrix, 0)
         mCube.draw(mMVPMatrix)
 
         //change the angle, so the cube will spin.
-        //mAngle += .4f
+        mAngle += .2f
     }
 
     // /
     // Handle surface changes
     //
     override fun onSurfaceChanged(glUnused: GL10, width: Int, height: Int) {
-        mWidth = width
-        mHeight = height
+        this.width = width
+        this.height = height
         // Set the viewport
-        GLES30.glViewport(0, 0, mWidth, mHeight)
-        val aspect = width.toFloat() / height
+        GLES30.glViewport(0, 0, this.width, this.height)
 
-        // this projection matrix is applied to object coordinates
-        //no idea why 53.13f, it was used in another example and it worked.
-        Matrix.perspectiveM(mProjectionMatrix, 0, 53.13f, aspect, Z_NEAR, Z_FAR)
+        // the projection matrix is the 3D virtual space (cube) that we want to project
+        val ratio = width.toFloat() / height
+        Matrix.frustumM(projectionMatrix, 0, -ratio, ratio, -1f, 1f, Z_NEAR, Z_FAR)
     }
 
     companion object {
         private const val TAG = "myRenderer"
         private const val Z_NEAR = 1f
         private const val Z_FAR = 10f
-
+        private val backgroundColor = floatArrayOf(0.0f, 0.0f, 0.0f, 1.0f)
 
         fun loadShader(type: Int, shaderSrc: String?): Int {
             val compiled = IntArray(1)
