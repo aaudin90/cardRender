@@ -1,4 +1,4 @@
-package com.aaudin90.glcardrender
+package com.aaudin90.glcardrender.internal.renderers
 
 import android.content.Context
 import android.opengl.GLES20
@@ -6,12 +6,11 @@ import android.opengl.GLES30
 import android.opengl.GLSurfaceView
 import android.opengl.Matrix
 import android.util.Log
-import com.aaudin90.glcardrender.api.CardModelLoader
-import com.aaudin90.glcardrender.internal.entity.Data3D
+import com.aaudin90.glcardrender.Cube
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
-internal class CardRenderer(private val context: Context) : GLSurfaceView.Renderer {
+internal class MainRenderer(private val context: Context) : GLSurfaceView.Renderer {
     private var width = 0
     private var height = 0
     private lateinit var mCube: Cube
@@ -27,8 +26,7 @@ internal class CardRenderer(private val context: Context) : GLSurfaceView.Render
     private val mViewMatrix = FloatArray(16)
     private val mRotationMatrix = FloatArray(16)
 
-    var cardModelLoader: CardModelLoader? = null
-    private var currentObject: Data3D? = null
+    var cardRenderer: CardRenderer? = null
 
     ///
     // Initialize the shader and program object
@@ -60,10 +58,6 @@ internal class CardRenderer(private val context: Context) : GLSurfaceView.Render
     // Draw a triangle using the shader pair created in onSurfaceCreated()
     //
     override fun onDrawFrame(glUnused: GL10) {
-        cardModelLoader?.also {
-            currentObject = it.getData3D()
-        }
-
         GLES20.glViewport(0, 0, width, height)
         GLES20.glScissor(0, 0, width, height)
 
@@ -74,26 +68,37 @@ internal class CardRenderer(private val context: Context) : GLSurfaceView.Render
         GLES30.glEnable(GLES30.GL_DEPTH_TEST)
 
         // Set the camera position (View matrix)  note Matrix is an include, not a declared method.
-        Matrix.setLookAtM(mViewMatrix, 0, 0f, 0f, -3f, 0f, 0f, 0f, 0f, 1.0f, 0.0f)
+        Matrix.setLookAtM(mViewMatrix, 0, 0f, 0f, -4f, 0f, 0f, 0f, 0f, 1f, 0f)
 
         // Create a rotation and translation for the cube
         Matrix.setIdentityM(mRotationMatrix, 0)
 
         //move the cube up/down and left/right
-        Matrix.translateM(mRotationMatrix, 0, x, y, 0f)
+        Matrix.translateM(mRotationMatrix, 0, 0f, 0f, 10f)
 
         //mangle is how fast, x,y,z which directions it rotates.
-        Matrix.rotateM(mRotationMatrix, 0, mAngle, 0.0f, 1.0f, 0.0f)
-
+        //Matrix.rotateM(mRotationMatrix, 0, -mAngle, 1.0f, 0f, 0f)
+        Matrix.rotateM(mRotationMatrix, 0, mAngle, 0f, 1.0f, 0f)
         // combine the model with the view matrix
         Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mRotationMatrix, 0)
 
         // combine the model-view with the projection matrix
         Matrix.multiplyMM(mMVPMatrix, 0, projectionMatrix, 0, mMVPMatrix, 0)
         mCube.draw(mMVPMatrix)
+        cardRenderer?.apply {
+            if (!isInitialized) {
+                init()
+            }
+            draw(mMVPMatrix)
+        }
 
         //change the angle, so the cube will spin.
-        mAngle += .2f
+//        if (mAngle > 180) {
+//            mAngle = 180f
+//        } else {
+//            mAngle +=.4f
+//        }
+        //mAngle +=.4f
     }
 
     // /
@@ -103,17 +108,19 @@ internal class CardRenderer(private val context: Context) : GLSurfaceView.Render
         this.width = width
         this.height = height
         // Set the viewport
-        GLES30.glViewport(0, 0, this.width, this.height)
+        GLES30.glViewport(0, 0, width, height)
 
-        // the projection matrix is the 3D virtual space (cube) that we want to project
-        val ratio = width.toFloat() / height
-        Matrix.frustumM(projectionMatrix, 0, -ratio, ratio, -1f, 1f, Z_NEAR, Z_FAR)
+        val aspect = width.toFloat() / height
+
+        // this projection matrix is applied to object coordinates
+        //no idea why 53.13f, it was used in another example and it worked.
+        Matrix.perspectiveM(projectionMatrix, 0, 53.13f, aspect, Z_NEAR, Z_FAR)
     }
 
     companion object {
         private const val TAG = "myRenderer"
         private const val Z_NEAR = 1f
-        private const val Z_FAR = 10f
+        private const val Z_FAR = 100f
         private val backgroundColor = floatArrayOf(0.0f, 0.0f, 0.0f, 1.0f)
 
         fun loadShader(type: Int, shaderSrc: String?): Int {

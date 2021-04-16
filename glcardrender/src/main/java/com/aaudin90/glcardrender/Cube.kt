@@ -3,6 +3,7 @@ package com.aaudin90.glcardrender
 import android.opengl.GLES20
 import android.opengl.GLES30
 import android.util.Log
+import com.aaudin90.glcardrender.internal.renderers.MainRenderer
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
@@ -120,7 +121,7 @@ class Cube(private val texture: Int) {
 
         // get handle to shape's transformation matrix
         mMVPMatrixHandle = GLES30.glGetUniformLocation(mProgramObject, "uMVPMatrix")
-        CardRenderer.checkGlError("glGetUniformLocation")
+        MainRenderer.checkGlError("glGetUniformLocation")
 
         // get handle to fragment shader's vColor member
         mColorHandle = GLES30.glGetUniformLocation(mProgramObject, "vColor")
@@ -132,7 +133,7 @@ class Cube(private val texture: Int) {
 
         // Apply the projection and view transformation
         GLES30.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0)
-        CardRenderer.checkGlError("glUniformMatrix4fv")
+        MainRenderer.checkGlError("glUniformMatrix4fv")
         val VERTEX_POS_INDX = 0
         mVertices.position(VERTEX_POS_INDX) //just in case.  We did it already though.
 
@@ -194,8 +195,8 @@ class Cube(private val texture: Int) {
         val linked = IntArray(1)
 
         // Load the vertex/fragment shaders
-        val vertexShader = CardRenderer.loadShader(GLES30.GL_VERTEX_SHADER, vShaderStr)
-        val fragmentShader = CardRenderer.loadShader(GLES30.GL_FRAGMENT_SHADER, fShaderStr)
+        val vertexShader = MainRenderer.loadShader(GLES30.GL_VERTEX_SHADER, vShaderStr)
+        val fragmentShader = MainRenderer.loadShader(GLES30.GL_FRAGMENT_SHADER, fShaderStr)
 
         // Create the program object
         val programObject = GLES30.glCreateProgram()

@@ -4,12 +4,14 @@ import android.content.Context
 import android.opengl.GLSurfaceView
 import android.view.MotionEvent
 import com.aaudin90.glcardrender.api.CardModelLoader
+import com.aaudin90.glcardrender.internal.renderers.CardRenderer
+import com.aaudin90.glcardrender.internal.renderers.MainRenderer
 
 class CardGlSurfaceView(context: Context) : GLSurfaceView(context) {
 
     private var mPreviousX = 0f
     private var mPreviousY = 0f
-    private var render = CardRenderer(context)
+    private var render = MainRenderer(context)
 
 
     init {
@@ -19,8 +21,8 @@ class CardGlSurfaceView(context: Context) : GLSurfaceView(context) {
         renderMode = RENDERMODE_CONTINUOUSLY
     }
 
-    fun init(cardModelLoader: CardModelLoader) {
-        render.cardModelLoader = cardModelLoader
+    fun setModelLoader(cardModelLoader: CardModelLoader) {
+        render.cardRenderer = CardRenderer(cardModelLoader.getData3D())
     }
 
     override fun onTouchEvent(e: MotionEvent): Boolean {
@@ -48,6 +50,6 @@ class CardGlSurfaceView(context: Context) : GLSurfaceView(context) {
 
     companion object {
         //private final float TOUCH_SCALE_FACTOR = 180.0f / 320;
-        private const val TOUCH_SCALE_FACTOR = 0.005f
+        private const val TOUCH_SCALE_FACTOR = 0.1f
     }
 }
