@@ -39,8 +39,8 @@ internal class CardRenderer(
         GLES30.glAttachShader(programObject, vertexShader)
         GLES30.glAttachShader(programObject, fragmentShader)
 
-        GLES30.glBindAttribLocation(programObject, 0, "vPosition")
-        GLES30.glBindAttribLocation(programObject, 2, "aTexturePosition")
+        GLES30.glBindAttribLocation(programObject, 6, "a_Position")
+        GLES30.glBindAttribLocation(programObject, 0, "a_TexPosition")
 
         // Link the program
         GLES30.glLinkProgram(programObject)
@@ -67,27 +67,29 @@ internal class CardRenderer(
 
     fun draw(mvpMatrix: FloatArray) {
         if (!isInitialized) return
-
         GLES30.glUseProgram(programIndex)
+        setTextureData()
         setVertexData()
         setColorData()
-        setTextureData()
-        // get handle to shape's transformation matrix
         setMVPData(mvpMatrix)
-
-        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureIndex)
 
         GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, renderData.vertexBuffer.capacity() / 3)
     }
 
     private fun setTextureData() {
-        val vTexCoordinateHandler = GLES30.glGetAttribLocation(programIndex, "aTexturePosition")
+        val texHandler = GLES30.glGetAttribLocation(programIndex, "a_TexPosition")
         renderData.textureBuffer.position(0)
         GLES30.glVertexAttribPointer(
-            vTexCoordinateHandler, 2, GLES30.GL_FLOAT,
+            texHandler, 2, GLES30.GL_FLOAT,
             false, 0, renderData.textureBuffer
         )
-        GLES30.glEnableVertexAttribArray(0)
+        GLES30.glEnableVertexAttribArray(texHandler)
+
+        val uTextureUnitHandler = GLES30.glGetUniformLocation(programIndex, "u_Texture")
+        GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureIndex)
+        GLES30.glUniform1i(uTextureUnitHandler, 0)
+        GLUtil.checkGlError("glUniform1i")
     }
 
     private fun setMVPData(mvpMatrix: FloatArray) {
@@ -102,13 +104,13 @@ internal class CardRenderer(
     }
 
     private fun setVertexData() {
-        val vertexHandler = GLES30.glGetAttribLocation(programIndex, "vPosition")
+        val vertexHandler = GLES30.glGetAttribLocation(programIndex, "a_Position")
         renderData.vertexBuffer.position(0)
         GLES30.glVertexAttribPointer(
             vertexHandler, 3, GLES30.GL_FLOAT,
             false, 0, renderData.vertexBuffer
         )
-        GLES30.glEnableVertexAttribArray(0)
+        GLES30.glEnableVertexAttribArray(vertexHandler)
     }
 
     private companion object {

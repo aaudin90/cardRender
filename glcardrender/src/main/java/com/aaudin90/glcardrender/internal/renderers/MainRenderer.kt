@@ -44,14 +44,13 @@ internal class MainRenderer(private val context: Context) : GLSurfaceView.Render
         )
 
         GLES30.glEnable(GLES20.GL_DEPTH_TEST)
-
-        // Enable not drawing out of view port
-
-        // Enable not drawing out of view port
         GLES30.glEnable(GLES20.GL_SCISSOR_TEST)
-        //initialize the cube code for drawing.
-        mCube = Cube(0)
-        //if we had other objects setup them up here as well.
+
+        cardRenderer?.apply {
+            if (!isInitialized) {
+                init(context)
+            }
+        }
     }
 
     // /
@@ -68,17 +67,18 @@ internal class MainRenderer(private val context: Context) : GLSurfaceView.Render
         GLES30.glEnable(GLES30.GL_DEPTH_TEST)
 
         // Set the camera position (View matrix)  note Matrix is an include, not a declared method.
-        Matrix.setLookAtM(mViewMatrix, 0, 0f, 0f, -4f, 0f, 0f, 0f, 0f, 1f, 0f)
+        Matrix.setLookAtM(mViewMatrix, 0, 0f, 0f, -14f, 0f, 0f, 0f, 0f, 1f, 0f)
 
         // Create a rotation and translation for the cube
         Matrix.setIdentityM(mRotationMatrix, 0)
 
         //move the cube up/down and left/right
-        Matrix.translateM(mRotationMatrix, 0, 0f, 0f, 10f)
+        Matrix.translateM(mRotationMatrix, 0, 0f, 0f, 0f)
 
         //mangle is how fast, x,y,z which directions it rotates.
         //Matrix.rotateM(mRotationMatrix, 0, -mAngle, 1.0f, 0f, 0f)
-        Matrix.rotateM(mRotationMatrix, 0, -x, 0f, 1.0f, 0f)
+        Matrix.rotateM(mRotationMatrix, 0, -x, 0f, 0.5f, 0f)
+        //Matrix.rotateM(mRotationMatrix, 0, y, 1f, 0.0f, 0f)
         // combine the model with the view matrix
         Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mRotationMatrix, 0)
 
@@ -113,7 +113,7 @@ internal class MainRenderer(private val context: Context) : GLSurfaceView.Render
         private const val TAG = "myRenderer"
         private const val Z_NEAR = 1f
         private const val Z_FAR = 100f
-        private val backgroundColor = floatArrayOf(0.0f, 0.0f, 0.0f, 1.0f)
+        private val backgroundColor = floatArrayOf(1.0f, 1.0f, 1.0f, 1.0f)
 
         fun checkGlError(glOperation: String) {
             var error: Int

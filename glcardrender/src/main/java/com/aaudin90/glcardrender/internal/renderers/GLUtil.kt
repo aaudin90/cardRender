@@ -3,12 +3,12 @@ package com.aaudin90.glcardrender.internal.renderers
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.opengl.GLES30
+import android.opengl.GLUtils.texImage2D
 import android.util.Log
 import java.io.ByteArrayInputStream
 import java.io.InputStream
-import java.nio.ByteBuffer
 
-object GLUtil {
+internal object GLUtil {
     private const val TAG = "GLUtil"
 
     /**
@@ -71,29 +71,31 @@ object GLUtil {
      * @param shaderCode - String containing the shader code.
      * @return - Returns an id for the shader.
      */
-    fun loadShader(type: Int, shaderCode: String): Int {
-
-        // create a vertex shader type (GLES30.GL_VERTEX_SHADER)
-        // or a fragment shader type (GLES30.GL_FRAGMENT_SHADER)
-        val shader: Int = GLES30.glCreateShader(type)
-
-        // add the source code to the shader and compile it
-        GLES30.glShaderSource(shader, shaderCode)
-        GLES30.glCompileShader(shader)
+    fun loadShader(type: Int, shaderSrc: String): Int {
         val compiled = IntArray(1)
+
+        // Create the shader object
+        val shader: Int = GLES30.glCreateShader(type)
+        if (shader == 0) {
+            return 0
+        }
+
+        // Load the shader source
+        GLES30.glShaderSource(shader, shaderSrc)
+
+        // Compile the shader
+        GLES30.glCompileShader(shader)
+
+        // Check the compile status
         GLES30.glGetShaderiv(shader, GLES30.GL_COMPILE_STATUS, compiled, 0)
-        Log.d("GLUtil", "Shader compilation info: " + GLES30.glGetShaderInfoLog(shader))
         if (compiled[0] == 0) {
-            Log.e(
-                "GLUtil", """
-     Shader error: ${GLES30.glGetShaderInfoLog(shader)}
-     $shaderCode
-     """.trimIndent()
-            )
+            Log.e("ssssss", GLES30.glGetShaderInfoLog(shader))
             GLES30.glDeleteShader(shader)
+            return 0
         }
         return shader
     }
+
 
     fun loadTexture(textureData: ByteArray): Int {
         ByteArrayInputStream(textureData).use { textureIs ->
@@ -104,32 +106,19 @@ object GLUtil {
             if (textureHandle[0] == 0) {
                 throw RuntimeException("Error loading texture.")
             }
-            Log.v("GLUtil", "Handler: " + textureHandle[0])
-            //val bitmap: Bitmap = loadBitmap(textureIs)
+            GLES30.glPixelStorei(GLES30.GL_UNPACK_ALIGNMENT, 1);
+            val bitmap: Bitmap = loadBitmap(textureIs)
 
-            val options: BitmapFactory.Options = BitmapFactory.Options()
-            options.inScaled = false
-            options.inJustDecodeBounds = true
-            val bitmap = BitmapFactory.decodeStream(textureIs, null, options)
             // Bind to the texture in OpenGL
-            GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
+
+            // настройка объекта текстуры
+            GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
             GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureHandle[0])
             checkGlError("glBindTexture")
-            //texImage2D(GLES30.GL_TEXTURE_2D, 0, bitmap, 0)
-            GLES30.glTexImage2D(
-                GLES30.GL_TEXTURE_2D,
-                0,
-                GLES30.GL_RGB,
-                bitmap?.width ?: 0,
-                bitmap?.height ?: 0,
-                0,
-                GLES30.GL_RGB,
-                GLES30.GL_UNSIGNED_BYTE,
-                ByteBuffer.wrap(textureData)
-            )
+            texImage2D(GLES30.GL_TEXTURE_2D, 0, bitmap, 0)
             checkGlError("texImage2D")
             GLES30.glGenerateMipmap(GLES30.GL_TEXTURE_2D)
-            bitmap?.recycle()
+            bitmap.recycle()
             GLES30.glTexParameteri(
                 GLES30.GL_TEXTURE_2D,
                 GLES30.GL_TEXTURE_WRAP_S,
@@ -151,6 +140,7 @@ object GLUtil {
                 GLES30.GL_NEAREST
             )
             Log.v("GLUtil", "Loaded texture ok")
+
             GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, 0)
             return textureHandle[0]
         }
@@ -174,7 +164,6 @@ object GLUtil {
         // resource folder you placed the image in. We don’t want Android to scale our bitmap at all, so to be sure,
         // we set inScaled to false.
         options.inScaled = false
-        options.inJustDecodeBounds = true
         // Read in the resource
         return BitmapFactory.decodeStream(inputStream, null, options)
             ?: throw RuntimeException("couldn't load bitmap")
@@ -193,7 +182,7 @@ object GLUtil {
      *
      * @param glOperation - Name of the OpenGL call to check.
      */
-    private fun checkGlError(glOperation: String): Boolean {
+    fun checkGlError(glOperation: String): Boolean {
         var glError: Int
         var error = false
         while (GLES30.glGetError().also { glError = it } != GLES30.GL_NO_ERROR) {

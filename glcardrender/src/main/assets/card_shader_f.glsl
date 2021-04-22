@@ -8,7 +8,5 @@ in vec2 vTexturePosition;
 
 void main()
 {
-    fragColor = vColor;
-//    vec2 vect = vec2(0.5, 0.7);
-//    fragColor = texture(u_Texture, vect);
+    fragColor = texture(u_Texture, vTexturePosition);
 }
