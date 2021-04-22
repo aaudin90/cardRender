@@ -78,27 +78,19 @@ internal class MainRenderer(private val context: Context) : GLSurfaceView.Render
 
         //mangle is how fast, x,y,z which directions it rotates.
         //Matrix.rotateM(mRotationMatrix, 0, -mAngle, 1.0f, 0f, 0f)
-        Matrix.rotateM(mRotationMatrix, 0, mAngle, 0f, 1.0f, 0f)
+        Matrix.rotateM(mRotationMatrix, 0, -x, 0f, 1.0f, 0f)
         // combine the model with the view matrix
         Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mRotationMatrix, 0)
 
         // combine the model-view with the projection matrix
         Matrix.multiplyMM(mMVPMatrix, 0, projectionMatrix, 0, mMVPMatrix, 0)
-        mCube.draw(mMVPMatrix)
+        //mCube.draw(mMVPMatrix)
         cardRenderer?.apply {
             if (!isInitialized) {
-                init()
+                init(context)
             }
             draw(mMVPMatrix)
         }
-
-        //change the angle, so the cube will spin.
-//        if (mAngle > 180) {
-//            mAngle = 180f
-//        } else {
-//            mAngle +=.4f
-//        }
-        //mAngle +=.4f
     }
 
     // /
@@ -122,32 +114,6 @@ internal class MainRenderer(private val context: Context) : GLSurfaceView.Render
         private const val Z_NEAR = 1f
         private const val Z_FAR = 100f
         private val backgroundColor = floatArrayOf(0.0f, 0.0f, 0.0f, 1.0f)
-
-        fun loadShader(type: Int, shaderSrc: String?): Int {
-            val compiled = IntArray(1)
-
-            // Create the shader object
-            val shader: Int = GLES30.glCreateShader(type)
-            if (shader == 0) {
-                return 0
-            }
-
-            // Load the shader source
-            GLES30.glShaderSource(shader, shaderSrc)
-
-            // Compile the shader
-            GLES30.glCompileShader(shader)
-
-            // Check the compile status
-            GLES30.glGetShaderiv(shader, GLES30.GL_COMPILE_STATUS, compiled, 0)
-            if (compiled[0] == 0) {
-                Log.e(TAG, "Erorr!!!!")
-                Log.e(TAG, GLES30.glGetShaderInfoLog(shader))
-                GLES30.glDeleteShader(shader)
-                return 0
-            }
-            return shader
-        }
 
         fun checkGlError(glOperation: String) {
             var error: Int

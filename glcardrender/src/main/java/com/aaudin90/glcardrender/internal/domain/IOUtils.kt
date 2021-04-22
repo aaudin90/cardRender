@@ -1,5 +1,6 @@
 package com.aaudin90.glcardrender.internal.domain
 
+import android.content.Context
 import java.io.*
 import java.nio.*
 
@@ -50,6 +51,11 @@ internal object IOUtils {
     fun createShortBuffer(shorts: Int): ShortBuffer {
         return createNativeByteBuffer(shorts * 2).asShortBuffer()
     }
+
+    fun loadAssetAsString(context: Context, assetName: String): String =
+        context.assets.open(assetName).bufferedReader().use {
+            it.readText()
+        }
 
     private fun createNativeByteBuffer(length: Int): ByteBuffer {
         // initialize vertex byte buffer for shape coordinates

@@ -36,7 +36,7 @@ class CardGlSurfaceView(context: Context) : GLSurfaceView(context) {
                 val dx = x - mPreviousX
                 //subtract, so the cube moves the same direction as your finger.
                 //with plus it moves the opposite direction.
-                render?.let {
+                render.let {
                     it.x = (it.x - dx * TOUCH_SCALE_FACTOR)
                     val dy = y - mPreviousY
                     it.y = (it.y - dy * TOUCH_SCALE_FACTOR)

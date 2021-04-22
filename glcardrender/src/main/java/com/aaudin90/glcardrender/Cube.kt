@@ -3,6 +3,7 @@ package com.aaudin90.glcardrender
 import android.opengl.GLES20
 import android.opengl.GLES30
 import android.util.Log
+import com.aaudin90.glcardrender.internal.renderers.GLUtil.loadShader
 import com.aaudin90.glcardrender.internal.renderers.MainRenderer
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -195,8 +196,8 @@ class Cube(private val texture: Int) {
         val linked = IntArray(1)
 
         // Load the vertex/fragment shaders
-        val vertexShader = MainRenderer.loadShader(GLES30.GL_VERTEX_SHADER, vShaderStr)
-        val fragmentShader = MainRenderer.loadShader(GLES30.GL_FRAGMENT_SHADER, fShaderStr)
+        val vertexShader = loadShader(GLES30.GL_VERTEX_SHADER, vShaderStr)
+        val fragmentShader = loadShader(GLES30.GL_FRAGMENT_SHADER, fShaderStr)
 
         // Create the program object
         val programObject = GLES30.glCreateProgram()
