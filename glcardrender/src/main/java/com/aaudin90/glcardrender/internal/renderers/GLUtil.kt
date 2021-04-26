@@ -4,9 +4,12 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.opengl.GLES30
 import android.opengl.GLUtils.texImage2D
+import android.opengl.Matrix
 import android.util.Log
+import com.aaudin90.glcardrender.internal.entity.MeshData
 import java.io.ByteArrayInputStream
 import java.io.InputStream
+import kotlin.math.abs
 
 internal object GLUtil {
     private const val TAG = "GLUtil"
@@ -196,5 +199,23 @@ internal object GLUtil {
             // throw new RuntimeException(glOperation + ": glError " + error);
         }
         return error
+    }
+
+    fun inFrustum(modelMatrix: FloatArray, meshData: MeshData): Boolean {
+        val resultVector = FloatArray(4)
+        var inFrustum = true
+        meshData.vertices.forEach { vertexArray ->
+            val vertexArray4 = vertexArray.copyOf(4).also {
+                it[3] = 1f
+            }
+            Matrix.multiplyMV(resultVector, 0, modelMatrix, 0, vertexArray4, 0)
+
+            inFrustum = abs(resultVector[0]) < resultVector[3]
+                    && abs(resultVector[1]) < resultVector[3]
+                    && abs(resultVector[2]) < resultVector[3]
+
+            if (!inFrustum) return inFrustum
+        }
+        return inFrustum
     }
 }

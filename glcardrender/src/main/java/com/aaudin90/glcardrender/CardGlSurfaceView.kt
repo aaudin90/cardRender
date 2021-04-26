@@ -2,17 +2,20 @@ package com.aaudin90.glcardrender
 
 import android.content.Context
 import android.opengl.GLSurfaceView
+import android.util.AttributeSet
 import android.view.MotionEvent
 import com.aaudin90.glcardrender.api.CardModelLoader
 import com.aaudin90.glcardrender.internal.renderers.CardRenderer
 import com.aaudin90.glcardrender.internal.renderers.MainRenderer
 
-class CardGlSurfaceView(context: Context) : GLSurfaceView(context) {
+class CardGlSurfaceView(
+    context: Context,
+    attrs: AttributeSet? = null
+) : GLSurfaceView(context, attrs) {
 
     private var mPreviousX = 0f
     private var mPreviousY = 0f
     private var render = MainRenderer(context)
-
 
     init {
         // Create an OpenGL ES 3.0 context.

@@ -3,14 +3,12 @@ package com.aaudin90.glcardrender.internal.renderers
 import android.content.Context
 import android.opengl.GLES30
 import android.util.Log
-import com.aaudin90.glcardrender.TestColor
 import com.aaudin90.glcardrender.internal.domain.IOUtils.loadAssetAsString
-import com.aaudin90.glcardrender.internal.domain.Math3DUtils
 import com.aaudin90.glcardrender.internal.entity.Data3D
 import com.aaudin90.glcardrender.internal.renderers.GLUtil.loadShader
 
 internal class CardRenderer(
-    private val renderData: Data3D
+    val renderData: Data3D
 ) {
 
     var isInitialized: Boolean = false
@@ -20,8 +18,6 @@ internal class CardRenderer(
     private var textureIndex: Int = -1
 
     fun init(context: Context) {
-        if (isInitialized) return
-
         val vertexShader = loadShader(
             GLES30.GL_VERTEX_SHADER,
             loadAssetAsString(context, "card_shader_v.glsl")
@@ -70,7 +66,6 @@ internal class CardRenderer(
         GLES30.glUseProgram(programIndex)
         setTextureData()
         setVertexData()
-        setColorData()
         setMVPData(mvpMatrix)
 
         GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, renderData.vertexBuffer.capacity() / 3)
@@ -97,12 +92,6 @@ internal class CardRenderer(
         GLES30.glUniformMatrix4fv(mVPMatrixHandle, 1, false, mvpMatrix, 0)
     }
 
-    private fun setColorData() {
-        val colorHandle = GLES30.glGetUniformLocation(programIndex, "vColor")
-        val color = Math3DUtils.mult(yellow, gray)
-        GLES30.glUniform4fv(colorHandle, 1, color, 0)
-    }
-
     private fun setVertexData() {
         val vertexHandler = GLES30.glGetAttribLocation(programIndex, "a_Position")
         renderData.vertexBuffer.position(0)
@@ -111,13 +100,5 @@ internal class CardRenderer(
             false, 0, renderData.vertexBuffer
         )
         GLES30.glEnableVertexAttribArray(vertexHandler)
-    }
-
-    private companion object {
-        val blue = TestColor.blue()
-        val red = TestColor.red()
-        val gray = TestColor.gray()
-        val green = TestColor.green()
-        val yellow = TestColor.yellow()
     }
 }

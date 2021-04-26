@@ -9,16 +9,20 @@ import com.aaudin90.glcardrender.api.CardModelLoader
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var surfaceView: CardGlSurfaceView
+    private lateinit var surfaceView1: CardGlSurfaceView
+    private lateinit var surfaceView2: CardGlSurfaceView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         if (detectOpenGLES30()) {
-            val loader = CardModelLoader(application)
-            surfaceView = CardGlSurfaceView(this)
-            setContentView(surfaceView)
-            surfaceView.setModelLoader(loader)
+            val loader1 = CardModelLoader(application)
+            val loader2 = CardModelLoader(application)
+            setContentView(R.layout.activity_main)
+            surfaceView1 = findViewById(R.id.sv1)
+            //surfaceView2 = findViewById(R.id.sv2)
+            surfaceView1.setModelLoader(loader1)
+            //.setModelLoader(loader2)
         } else {
             Log.e("openglcube", "OpenGL ES 3.0 not supported on device.  Exiting...")
             finish()
@@ -27,12 +31,14 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        surfaceView.onResume()
+        surfaceView1.onResume()
+        //surfaceView2.onResume()
     }
 
     override fun onStop() {
         super.onStop()
-        surfaceView.onPause()
+        surfaceView1.onPause()
+        //surfaceView2.onPause()
     }
 
     private fun detectOpenGLES30(): Boolean {
