@@ -58,9 +58,9 @@ internal class MainRenderer(private val context: Context) : GLSurfaceView.Render
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
         GLES30.glEnable(GLES30.GL_DEPTH_TEST)
 
-        calculateMVPMatrix()
-
         cardRenderer?.apply {
+            calculateMVPMatrix()
+
             if (!isZCalculated) {
                 calculateZ(renderData.meshData)
             }
@@ -98,19 +98,6 @@ internal class MainRenderer(private val context: Context) : GLSurfaceView.Render
     }
 
     private fun createViewMatrix() {
-        // точка положения камеры
-        val eyeX = 0f
-        val eyeY = 0f
-
-        // точка направления камеры
-        val centerX = 0f
-        val centerY = 0f
-        val centerZ = 1f
-
-        // up-вектор
-        val upX = 0f
-        val upY = 1f
-        val upZ = 0f
 
         Matrix.setLookAtM(
             mViewMatrix,
@@ -122,10 +109,25 @@ internal class MainRenderer(private val context: Context) : GLSurfaceView.Render
 
     }
 
-    companion object {
-        private const val TAG = "MainRenderer"
-        private const val Z_NEAR = .1f
-        private const val Z_FAR = 100f
-        private val backgroundColor = floatArrayOf(1.0f, 1.0f, 1.0f, 1.0f)
+    private companion object {
+        const val TAG = "MainRenderer"
+        const val Z_NEAR = .1f
+        const val Z_FAR = 100f
+
+        // точка положения камеры
+        const val eyeX = 0f
+        const val eyeY = 0f
+
+        // точка направления камеры
+        const val centerX = 0f
+        const val centerY = 0f
+        const val centerZ = 1f
+
+        // up-вектор
+        const val upX = 0f
+        const val upY = 1f
+        const val upZ = 0f
+
+        val backgroundColor = floatArrayOf(1.0f, 1.0f, 1.0f, 1.0f)
     }
 }

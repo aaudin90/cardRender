@@ -66,9 +66,20 @@ internal class CardRenderer(
         GLES30.glUseProgram(programIndex)
         setTextureData()
         setVertexData()
+        setNormalsData()
         setMVPData(mvpMatrix)
 
         GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, renderData.vertexBuffer.capacity() / 3)
+    }
+
+    private fun setNormalsData() {
+        val normalsHandler = GLES30.glGetAttribLocation(programIndex, "a_Normals")
+        renderData.normalsBuffer.position(0)
+        GLES30.glVertexAttribPointer(
+            normalsHandler, 3, GLES30.GL_FLOAT,
+            false, 0, renderData.normalsBuffer
+        )
+        GLES30.glEnableVertexAttribArray(normalsHandler)
     }
 
     private fun setTextureData() {

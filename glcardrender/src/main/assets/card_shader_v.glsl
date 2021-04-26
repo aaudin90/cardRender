@@ -2,8 +2,10 @@
 uniform mat4 uMVPMatrix;
 in vec4 a_Position;
 in vec2 a_TexPosition;
+in vec4 a_Normals;
 
 out vec2 vTexturePosition;
+out vec4 vNormals;
 
 void main()
 {
