@@ -17,7 +17,6 @@ void main()
 
 
     FragPos = vec3(modelMatrix * a_Position);
-    //mat3(transpose(inverse(modelMatrix)))
     vNormals = mat3(normalizedModelMatrix) * a_Normals;
     vTexturePosition = a_TexPosition;
 }

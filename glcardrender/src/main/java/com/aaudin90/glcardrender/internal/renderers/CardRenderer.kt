@@ -97,7 +97,8 @@ internal class CardRenderer(
         val invertMatrix = FloatArray(16)
         Matrix.invertM(invertMatrix, 0, modelMatrix, 0)
         Matrix.transposeM(normalizedModelMatrix, 0, invertMatrix, 0)
-        val normalizedModelMatrixHandle = GLES30.glGetUniformLocation(programIndex, "normalizedModelMatrix")
+        val normalizedModelMatrixHandle =
+            GLES30.glGetUniformLocation(programIndex, "normalizedModelMatrix")
         GLES30.glUniformMatrix4fv(normalizedModelMatrixHandle, 1, false, normalizedModelMatrix, 0)
     }
 
@@ -128,7 +129,17 @@ internal class CardRenderer(
         GLES30.glUniformMatrix4fv(modelMatrixHandle, 1, false, modelMatrix, 0)
         GLES30.glUniformMatrix4fv(viewMatrixHandle, 1, false, viewMatrix, 0)
         GLES30.glUniformMatrix4fv(projectionMatrixHandle, 1, false, projectionMatrix, 0)
-        //Matrix.
+
+        val cameraVector = FloatArray(3)
+        val invertedViewMatrix = FloatArray(16)
+        Matrix.invertM(invertedViewMatrix, 0, viewMatrix, 0)
+        cameraVector.also {
+            it[0] = invertedViewMatrix[6]
+            it[0] = invertedViewMatrix[10]
+            it[0] = invertedViewMatrix[14]
+        }
+        val viewPosHandle = GLES30.glGetUniformLocation(programIndex, "viewPos")
+        GLES30.glUniform3fv(viewPosHandle, 1, cameraVector, 0)
     }
 
     private fun setVertexData() {

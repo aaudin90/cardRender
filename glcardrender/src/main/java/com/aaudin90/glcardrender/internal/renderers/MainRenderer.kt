@@ -8,15 +8,18 @@ import android.opengl.Matrix
 import com.aaudin90.glcardrender.internal.entity.MeshData
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
+import kotlin.math.sin
 
 internal class MainRenderer(private val context: Context) : GLSurfaceView.Renderer {
     var y = 0f
     var x = 0f
 
+    private var angle = 0f
+
     private val viewMatrix = FloatArray(16)
     private val modelMatrix = FloatArray(16)
     private val projectionMatrix = FloatArray(16)
-    private val lightPosition = floatArrayOf(-1f, 1f, 7.0f)
+    private val lightPosition = floatArrayOf(0f, 0f, 10.0f)
 
     private var width: Int = 0
     private var height: Int = 0
@@ -59,6 +62,9 @@ internal class MainRenderer(private val context: Context) : GLSurfaceView.Render
     override fun onDrawFrame(glUnused: GL10) {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
         GLES30.glEnable(GLES30.GL_DEPTH_TEST)
+
+        angle += .1f
+        lightPosition[1] = sin(angle / 2.0f) * 1.0f;
 
         cardRenderer?.apply {
             calculateMatrix()
