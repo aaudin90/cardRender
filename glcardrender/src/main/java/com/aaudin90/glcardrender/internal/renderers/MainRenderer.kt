@@ -5,7 +5,6 @@ import android.opengl.GLES20
 import android.opengl.GLES30
 import android.opengl.GLSurfaceView
 import android.opengl.Matrix
-import android.util.Log
 import com.aaudin90.glcardrender.internal.entity.MeshData
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
@@ -14,16 +13,18 @@ internal class MainRenderer(private val context: Context) : GLSurfaceView.Render
     var y = 0f
     var x = 0f
 
-    private val mVPMatrix = FloatArray(16)
-    private val mViewMatrix = FloatArray(16)
+    private val viewMatrix = FloatArray(16)
     private val modelMatrix = FloatArray(16)
     private val projectionMatrix = FloatArray(16)
+    private val lightPosition = floatArrayOf(-1f, 1f, 7.0f)
 
     private var width: Int = 0
     private var height: Int = 0
 
     private var eyeZ = 0f
     private var isZCalculated = false
+
+    private val microSunRenderer = MicroSunRenderer()
 
     var cardRenderer: CardRenderer? = null
 
@@ -39,6 +40,7 @@ internal class MainRenderer(private val context: Context) : GLSurfaceView.Render
         GLES30.glEnable(GLES20.GL_DEPTH_TEST)
         GLES30.glEnable(GLES20.GL_SCISSOR_TEST)
         cardRenderer?.init(context)
+        microSunRenderer.init(context)
     }
 
     override fun onSurfaceChanged(glUnused: GL10, width: Int, height: Int) {
@@ -59,7 +61,7 @@ internal class MainRenderer(private val context: Context) : GLSurfaceView.Render
         GLES30.glEnable(GLES30.GL_DEPTH_TEST)
 
         cardRenderer?.apply {
-            calculateMVPMatrix()
+            calculateMatrix()
 
             if (!isZCalculated) {
                 calculateZ(renderData.meshData)
@@ -69,44 +71,61 @@ internal class MainRenderer(private val context: Context) : GLSurfaceView.Render
                 init(context)
             }
 
-            draw(mVPMatrix)
+            draw(modelMatrix, viewMatrix, projectionMatrix, lightPosition)
+        }
+
+        microSunRenderer.apply {
+            val sunModelMatrix = FloatArray(16)
+            Matrix.setIdentityM(sunModelMatrix, 0)
+
+            Matrix.translateM(
+                sunModelMatrix,
+                0,
+                sunModelMatrix,
+                0,
+                lightPosition[0],
+                lightPosition[1],
+                lightPosition[2]
+            )
+
+            Matrix.scaleM(sunModelMatrix, 0, .2f, .2f, .2f)
+
+            draw(sunModelMatrix, viewMatrix, projectionMatrix)
         }
     }
 
-    private fun calculateMVPMatrix() {
+    private fun calculateMatrix() {
         Matrix.setIdentityM(modelMatrix, 0)
-
         Matrix.perspectiveM(projectionMatrix, 0, 18f, width.toFloat() / height, Z_NEAR, Z_FAR)
-        createViewMatrix()
-
-        Matrix.rotateM(modelMatrix, 0, -x, 0f, 1f, 0f)
-        Matrix.rotateM(modelMatrix, 0, -y, 1f, 0f, 0f)
-
-        Matrix.multiplyMM(mVPMatrix, 0, mViewMatrix, 0, modelMatrix, 0)
-        Matrix.multiplyMM(mVPMatrix, 0, projectionMatrix, 0, mVPMatrix, 0)
-    }
-
-    private fun calculateZ(meshData: MeshData) {
-        calculateMVPMatrix()
-        while (!GLUtil.inFrustum(mVPMatrix, meshData) && eyeZ < 50) {
-            eyeZ += .5f
-            calculateMVPMatrix()
-        }
-        eyeZ += 1f
-        Log.d(TAG, eyeZ.toString())
-        isZCalculated = true
-    }
-
-    private fun createViewMatrix() {
 
         Matrix.setLookAtM(
-            mViewMatrix,
+            viewMatrix,
             0,
             eyeX, eyeY, eyeZ,
             centerX, centerY, centerZ,
             upX, upY, upZ
         )
 
+        Matrix.rotateM(modelMatrix, 0, -x, 0f, 1f, 0f)
+        Matrix.rotateM(modelMatrix, 0, -y, 1f, 0f, 0f)
+    }
+
+    private fun calculateZ(meshData: MeshData) {
+        calculateMatrix()
+        while (!GLUtil.inFrustum(
+                modelMatrix,
+                viewMatrix,
+                projectionMatrix,
+                meshData
+            ) && eyeZ < 50
+        ) {
+            eyeZ += .5f
+            calculateMatrix()
+        }
+        eyeZ += eyeZ * .1f
+
+        eyeZ = 18f
+        isZCalculated = true
     }
 
     private companion object {

@@ -201,14 +201,23 @@ internal object GLUtil {
         return error
     }
 
-    fun inFrustum(modelMatrix: FloatArray, meshData: MeshData): Boolean {
+    fun inFrustum(
+        modelMatrix: FloatArray,
+        viewMatrix: FloatArray,
+        projectionMatrix: FloatArray,
+        meshData: MeshData
+    ): Boolean {
+        val mVPMatrix = FloatArray(16)
+        Matrix.multiplyMM(mVPMatrix, 0, viewMatrix, 0, modelMatrix, 0)
+        Matrix.multiplyMM(mVPMatrix, 0, projectionMatrix, 0, mVPMatrix, 0)
+
         val resultVector = FloatArray(4)
         var inFrustum = true
         meshData.vertices.forEach { vertexArray ->
             val vertexArray4 = vertexArray.copyOf(4).also {
                 it[3] = 1f
             }
-            Matrix.multiplyMV(resultVector, 0, modelMatrix, 0, vertexArray4, 0)
+            Matrix.multiplyMV(resultVector, 0, mVPMatrix, 0, vertexArray4, 0)
 
             inFrustum = abs(resultVector[0]) < resultVector[3]
                     && abs(resultVector[1]) < resultVector[3]

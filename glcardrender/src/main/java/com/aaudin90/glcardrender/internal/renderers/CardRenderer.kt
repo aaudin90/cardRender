@@ -2,6 +2,7 @@ package com.aaudin90.glcardrender.internal.renderers
 
 import android.content.Context
 import android.opengl.GLES30
+import android.opengl.Matrix
 import android.util.Log
 import com.aaudin90.glcardrender.internal.domain.IOUtils.loadAssetAsString
 import com.aaudin90.glcardrender.internal.entity.Data3D
@@ -61,18 +62,29 @@ internal class CardRenderer(
         isInitialized = true
     }
 
-    fun draw(mvpMatrix: FloatArray) {
+    fun draw(
+        modelMatrix: FloatArray,
+        viewMatrix: FloatArray,
+        projectionMatrix: FloatArray,
+        lightPosition: FloatArray
+    ) {
         if (!isInitialized) return
         GLES30.glUseProgram(programIndex)
         setTextureData()
         setVertexData()
-        setNormalsData()
-        setMVPData(mvpMatrix)
+        setNormalsData(modelMatrix)
+        setLightPosition(lightPosition)
+        setMVPData(modelMatrix, viewMatrix, projectionMatrix)
 
         GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, renderData.vertexBuffer.capacity() / 3)
     }
 
-    private fun setNormalsData() {
+    private fun setLightPosition(lightPosition: FloatArray) {
+        val lightPosHandle = GLES30.glGetUniformLocation(programIndex, "lightPos")
+        GLES30.glUniform3fv(lightPosHandle, 1, lightPosition, 0)
+    }
+
+    private fun setNormalsData(modelMatrix: FloatArray) {
         val normalsHandler = GLES30.glGetAttribLocation(programIndex, "a_Normals")
         renderData.normalsBuffer.position(0)
         GLES30.glVertexAttribPointer(
@@ -80,6 +92,13 @@ internal class CardRenderer(
             false, 0, renderData.normalsBuffer
         )
         GLES30.glEnableVertexAttribArray(normalsHandler)
+
+        val normalizedModelMatrix = FloatArray(16)
+        val invertMatrix = FloatArray(16)
+        Matrix.invertM(invertMatrix, 0, modelMatrix, 0)
+        Matrix.transposeM(normalizedModelMatrix, 0, invertMatrix, 0)
+        val normalizedModelMatrixHandle = GLES30.glGetUniformLocation(programIndex, "normalizedModelMatrix")
+        GLES30.glUniformMatrix4fv(normalizedModelMatrixHandle, 1, false, normalizedModelMatrix, 0)
     }
 
     private fun setTextureData() {
@@ -98,9 +117,18 @@ internal class CardRenderer(
         GLUtil.checkGlError("glUniform1i")
     }
 
-    private fun setMVPData(mvpMatrix: FloatArray) {
-        val mVPMatrixHandle = GLES30.glGetUniformLocation(programIndex, "uMVPMatrix")
-        GLES30.glUniformMatrix4fv(mVPMatrixHandle, 1, false, mvpMatrix, 0)
+    private fun setMVPData(
+        modelMatrix: FloatArray,
+        viewMatrix: FloatArray,
+        projectionMatrix: FloatArray
+    ) {
+        val modelMatrixHandle = GLES30.glGetUniformLocation(programIndex, "modelMatrix")
+        val viewMatrixHandle = GLES30.glGetUniformLocation(programIndex, "viewMatrix")
+        val projectionMatrixHandle = GLES30.glGetUniformLocation(programIndex, "projectionMatrix")
+        GLES30.glUniformMatrix4fv(modelMatrixHandle, 1, false, modelMatrix, 0)
+        GLES30.glUniformMatrix4fv(viewMatrixHandle, 1, false, viewMatrix, 0)
+        GLES30.glUniformMatrix4fv(projectionMatrixHandle, 1, false, projectionMatrix, 0)
+        //Matrix.
     }
 
     private fun setVertexData() {
