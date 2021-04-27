@@ -20,9 +20,9 @@ class MainActivity : AppCompatActivity() {
             val loader2 = CardModelLoader(application)
             setContentView(R.layout.activity_main)
             surfaceView1 = findViewById(R.id.sv1)
-            //surfaceView2 = findViewById(R.id.sv2)
+            surfaceView2 = findViewById(R.id.sv2)
             surfaceView1.setModelLoader(loader1)
-            //.setModelLoader(loader2)
+            surfaceView2.setModelLoader(loader2)
         } else {
             Log.e("openglcube", "OpenGL ES 3.0 not supported on device.  Exiting...")
             finish()
@@ -32,13 +32,13 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         surfaceView1.onResume()
-        //surfaceView2.onResume()
+        surfaceView2.onResume()
     }
 
     override fun onStop() {
         super.onStop()
         surfaceView1.onPause()
-        //surfaceView2.onPause()
+        surfaceView2.onPause()
     }
 
     private fun detectOpenGLES30(): Boolean {

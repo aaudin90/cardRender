@@ -17,6 +17,7 @@ internal class CardRenderer(
 
     private var programIndex: Int = -1
     private var textureIndex: Int = -1
+    private var specularMapIndex: Int = -1
 
     fun init(context: Context) {
         val vertexShader = loadShader(
@@ -42,11 +43,13 @@ internal class CardRenderer(
         // Link the program
         GLES30.glLinkProgram(programObject)
 
-        textureIndex = if (renderData.element.material?.textureData != null) {
-            GLUtil.loadTexture(renderData.element.material.textureData)
+        textureIndex = if (renderData.texture != null) {
+            GLUtil.loadTexture(renderData.texture, GLES30.GL_TEXTURE0)
         } else {
             -1
         }
+
+        specularMapIndex = GLUtil.loadTexture(renderData.specularMap, GLES30.GL_TEXTURE1)
 
         val linked = IntArray(1)
         // Check the link status
@@ -80,7 +83,7 @@ internal class CardRenderer(
     }
 
     private fun setLightPosition(lightPosition: FloatArray) {
-        val lightPosHandle = GLES30.glGetUniformLocation(programIndex, "lightPos")
+        val lightPosHandle = GLES30.glGetUniformLocation(programIndex, "vLightPos")
         GLES30.glUniform3fv(lightPosHandle, 1, lightPosition, 0)
     }
 
@@ -116,6 +119,12 @@ internal class CardRenderer(
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureIndex)
         GLES30.glUniform1i(uTextureUnitHandler, 0)
         GLUtil.checkGlError("glUniform1i")
+
+        val uSpecularMapHandler = GLES30.glGetUniformLocation(programIndex, "u_SpecularMap")
+        GLES30.glActiveTexture(GLES30.GL_TEXTURE1)
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, specularMapIndex)
+        GLES30.glUniform1i(uSpecularMapHandler, 1)
+        GLUtil.checkGlError("glUniform1i")
     }
 
     private fun setMVPData(
@@ -134,9 +143,9 @@ internal class CardRenderer(
         val invertedViewMatrix = FloatArray(16)
         Matrix.invertM(invertedViewMatrix, 0, viewMatrix, 0)
         cameraVector.also {
-            it[0] = invertedViewMatrix[6]
-            it[0] = invertedViewMatrix[10]
-            it[0] = invertedViewMatrix[14]
+            it[0] = invertedViewMatrix[7]
+            it[0] = invertedViewMatrix[11]
+            it[0] = invertedViewMatrix[15]
         }
         val viewPosHandle = GLES30.glGetUniformLocation(programIndex, "viewPos")
         GLES30.glUniform3fv(viewPosHandle, 1, cameraVector, 0)

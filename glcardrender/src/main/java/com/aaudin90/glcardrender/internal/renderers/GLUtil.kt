@@ -7,7 +7,6 @@ import android.opengl.GLUtils.texImage2D
 import android.opengl.Matrix
 import android.util.Log
 import com.aaudin90.glcardrender.internal.entity.MeshData
-import java.io.ByteArrayInputStream
 import java.io.InputStream
 import kotlin.math.abs
 
@@ -99,54 +98,46 @@ internal object GLUtil {
         return shader
     }
 
-
-    fun loadTexture(textureData: ByteArray): Int {
-        ByteArrayInputStream(textureData).use { textureIs ->
-            Log.v("GLUtil", "Loading texture from stream...")
-            val textureHandle = IntArray(1)
-            GLES30.glGenTextures(1, textureHandle, 0)
-            checkGlError("glGenTextures")
-            if (textureHandle[0] == 0) {
-                throw RuntimeException("Error loading texture.")
-            }
-            GLES30.glPixelStorei(GLES30.GL_UNPACK_ALIGNMENT, 1);
-            val bitmap: Bitmap = loadBitmap(textureIs)
-
-            // Bind to the texture in OpenGL
-
-            // настройка объекта текстуры
-            GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
-            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureHandle[0])
-            checkGlError("glBindTexture")
-            texImage2D(GLES30.GL_TEXTURE_2D, 0, bitmap, 0)
-            checkGlError("texImage2D")
-            GLES30.glGenerateMipmap(GLES30.GL_TEXTURE_2D)
-            bitmap.recycle()
-            GLES30.glTexParameteri(
-                GLES30.GL_TEXTURE_2D,
-                GLES30.GL_TEXTURE_WRAP_S,
-                GLES30.GL_REPEAT
-            )
-            GLES30.glTexParameteri(
-                GLES30.GL_TEXTURE_2D,
-                GLES30.GL_TEXTURE_WRAP_T,
-                GLES30.GL_REPEAT
-            )
-            GLES30.glTexParameteri(
-                GLES30.GL_TEXTURE_2D,
-                GLES30.GL_TEXTURE_MIN_FILTER,
-                GLES30.GL_NEAREST
-            )
-            GLES30.glTexParameteri(
-                GLES30.GL_TEXTURE_2D,
-                GLES30.GL_TEXTURE_MAG_FILTER,
-                GLES30.GL_NEAREST
-            )
-            Log.v("GLUtil", "Loaded texture ok")
-
-            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, 0)
-            return textureHandle[0]
+    fun loadTexture(bitmap: Bitmap, activeTextureIndex: Int): Int {
+        val textureHandle = IntArray(1)
+        GLES30.glGenTextures(1, textureHandle, 0)
+        checkGlError("glGenTextures")
+        if (textureHandle[0] == 0) {
+            throw RuntimeException("Error loading texture.")
         }
+        GLES30.glPixelStorei(GLES30.GL_UNPACK_ALIGNMENT, 1);
+
+        GLES30.glActiveTexture(activeTextureIndex)
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureHandle[0])
+        checkGlError("glBindTexture")
+        texImage2D(GLES30.GL_TEXTURE_2D, 0, bitmap, 0)
+        checkGlError("texImage2D")
+        GLES30.glGenerateMipmap(GLES30.GL_TEXTURE_2D)
+
+        GLES30.glTexParameteri(
+            GLES30.GL_TEXTURE_2D,
+            GLES30.GL_TEXTURE_WRAP_S,
+            GLES30.GL_REPEAT
+        )
+        GLES30.glTexParameteri(
+            GLES30.GL_TEXTURE_2D,
+            GLES30.GL_TEXTURE_WRAP_T,
+            GLES30.GL_REPEAT
+        )
+        GLES30.glTexParameteri(
+            GLES30.GL_TEXTURE_2D,
+            GLES30.GL_TEXTURE_MIN_FILTER,
+            GLES30.GL_NEAREST
+        )
+        GLES30.glTexParameteri(
+            GLES30.GL_TEXTURE_2D,
+            GLES30.GL_TEXTURE_MAG_FILTER,
+            GLES30.GL_NEAREST
+        )
+        Log.v("GLUtil", "Loaded texture ok")
+
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, 0)
+        return textureHandle[0]
     }
 
     private fun loadBitmap(bytes: ByteArray): Bitmap {

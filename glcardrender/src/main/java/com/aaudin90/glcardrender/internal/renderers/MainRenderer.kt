@@ -19,7 +19,7 @@ internal class MainRenderer(private val context: Context) : GLSurfaceView.Render
     private val viewMatrix = FloatArray(16)
     private val modelMatrix = FloatArray(16)
     private val projectionMatrix = FloatArray(16)
-    private val lightPosition = floatArrayOf(0f, 0f, 10.0f)
+    private val lightPosition = floatArrayOf(-10f, 0f, 25.0f)
 
     private var width: Int = 0
     private var height: Int = 0
@@ -64,7 +64,7 @@ internal class MainRenderer(private val context: Context) : GLSurfaceView.Render
         GLES30.glEnable(GLES30.GL_DEPTH_TEST)
 
         angle += .1f
-        lightPosition[1] = sin(angle / 2.0f) * 1.0f;
+        lightPosition[1] = sin(angle / 2);
 
         cardRenderer?.apply {
             calculateMatrix()
@@ -96,7 +96,7 @@ internal class MainRenderer(private val context: Context) : GLSurfaceView.Render
 
             Matrix.scaleM(sunModelMatrix, 0, .2f, .2f, .2f)
 
-            draw(sunModelMatrix, viewMatrix, projectionMatrix)
+            //draw(sunModelMatrix, viewMatrix, projectionMatrix)
         }
     }
 
@@ -125,12 +125,11 @@ internal class MainRenderer(private val context: Context) : GLSurfaceView.Render
                 meshData
             ) && eyeZ < 50
         ) {
-            eyeZ += .5f
+            eyeZ += .3f
             calculateMatrix()
         }
-        eyeZ += eyeZ * .1f
+        eyeZ += eyeZ * .05f
 
-        eyeZ = 18f
         isZCalculated = true
     }
 
@@ -153,6 +152,6 @@ internal class MainRenderer(private val context: Context) : GLSurfaceView.Render
         const val upY = 1f
         const val upZ = 0f
 
-        val backgroundColor = floatArrayOf(1.0f, 1.0f, 1.0f, 1.0f)
+        val backgroundColor = floatArrayOf(0.0f, 0.0f, 0.0f, 1.0f)
     }
 }

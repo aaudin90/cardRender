@@ -7,6 +7,8 @@ import android.view.MotionEvent
 import com.aaudin90.glcardrender.api.CardModelLoader
 import com.aaudin90.glcardrender.internal.renderers.CardRenderer
 import com.aaudin90.glcardrender.internal.renderers.MainRenderer
+import kotlin.math.min
+import kotlin.math.roundToInt
 
 class CardGlSurfaceView(
     context: Context,
@@ -18,10 +20,32 @@ class CardGlSurfaceView(
     private var render = MainRenderer(context)
 
     init {
-        // Create an OpenGL ES 3.0 context.
         setEGLContextClientVersion(3)
         setRenderer(render)
         renderMode = RENDERMODE_CONTINUOUSLY
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val widthMode = MeasureSpec.getMode(widthMeasureSpec)
+        val widthSize = MeasureSpec.getSize(widthMeasureSpec)
+        val heightMode = MeasureSpec.getMode(heightMeasureSpec)
+        val heightSize = MeasureSpec.getSize(heightMeasureSpec)
+
+        var width = context.resources.displayMetrics.widthPixels
+        if (widthMode == MeasureSpec.EXACTLY) {
+            width = widthSize
+        } else if (widthMode == MeasureSpec.AT_MOST) {
+            width = min(width, widthSize)
+        }
+
+        var height = (width / CARD_PROPORTION).roundToInt()
+        if (heightMode == MeasureSpec.EXACTLY) {
+            height = heightSize
+        } else if (heightMode == MeasureSpec.AT_MOST) {
+            height = min(height, heightSize)
+        }
+
+        setMeasuredDimension(width, height)
     }
 
     fun setModelLoader(cardModelLoader: CardModelLoader) {
@@ -51,8 +75,9 @@ class CardGlSurfaceView(
         return true
     }
 
-    companion object {
+    private companion object {
         //private final float TOUCH_SCALE_FACTOR = 180.0f / 320;
-        private const val TOUCH_SCALE_FACTOR = 0.1f
+        const val TOUCH_SCALE_FACTOR = 0.1f
+        const val CARD_PROPORTION = 1.57f
     }
 }

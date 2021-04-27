@@ -9,10 +9,10 @@
     <com.aaudin90.glcardrender.CardGlSurfaceView
         android:id="@+id/sv1"
         android:layout_width="match_parent"
-        android:layout_height="250dp" />
+        android:layout_height="wrap_content" />
 
-<!--    <com.aaudin90.glcardrender.CardGlSurfaceView-->
-<!--        android:id="@+id/sv2"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="300dp" />-->
+    <com.aaudin90.glcardrender.CardGlSurfaceView
+        android:id="@+id/sv2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 </LinearLayout>

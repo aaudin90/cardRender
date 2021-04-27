@@ -15,7 +15,6 @@ internal class InternalServiceLocator(
     val wavefrontLoader by lazy {
         WavefrontLoader(
             wavefrontDataRepository,
-            wavefrontMaterialRepository,
             textureRepository,
             fixNormalsMapper
         )
@@ -24,12 +23,6 @@ internal class InternalServiceLocator(
     private val textureRepository by lazy {
         TextureRepository(
             TextureDataSource(application)
-        )
-    }
-
-    private val wavefrontMaterialRepository by lazy {
-        WavefrontMaterialRepository(
-            WavefrontMaterialDataSource(application)
         )
     }
 
