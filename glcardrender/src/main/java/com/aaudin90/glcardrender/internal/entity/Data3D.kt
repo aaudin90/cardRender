@@ -9,7 +9,15 @@ internal data class Data3D(
     val textureBuffer: FloatBuffer,
     val meshData: MeshData,
     val specularMap: Bitmap,
-    val texture: Bitmap?
+    val texture: Bitmap?,
+    val specularMapStrength: Float,
+    val specularMapLightColor: FloatArray,
+    val specularTextureStrength: Float,
+    val specularTextureLightColor: FloatArray,
+    val diffuseStrength: Float,
+    val diffuseLightColor: FloatArray,
+    val ambientStrength: Float,
+    val ambientLightColor: FloatArray
 ) {
 
     override fun equals(other: Any?): Boolean {

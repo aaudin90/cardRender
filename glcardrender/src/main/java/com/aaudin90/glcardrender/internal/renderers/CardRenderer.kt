@@ -11,7 +11,6 @@ import com.aaudin90.glcardrender.internal.renderers.GLUtil.loadShader
 internal class CardRenderer(
     val renderData: Data3D
 ) {
-
     var isInitialized: Boolean = false
         private set
 
@@ -55,14 +54,25 @@ internal class CardRenderer(
         // Check the link status
         GLES30.glGetProgramiv(programObject, GLES30.GL_LINK_STATUS, linked, 0)
         if (linked[0] == 0) {
-            Log.e("sssss", "Error linking program:")
-            Log.e("sssss", GLES30.glGetProgramInfoLog(programObject))
+            Log.e(TAG, "Error linking program:")
+            Log.e(TAG, GLES30.glGetProgramInfoLog(programObject))
             GLES30.glDeleteProgram(programObject)
             throw Exception("Error linking program:")
         }
         // Store the program object
         programIndex = programObject
+        GLES30.glUseProgram(programIndex)
+        setLightProperties()
+        setTextureData()
+        setVertexData()
         isInitialized = true
+    }
+
+    fun release() {
+        GLES30.glUseProgram(programIndex)
+        GLES30.glDeleteTextures(1, intArrayOf(textureIndex), 0)
+        GLES30.glDeleteTextures(1, intArrayOf(specularMapIndex), 0)
+        GLES30.glDeleteProgram(programIndex)
     }
 
     fun draw(
@@ -73,13 +83,42 @@ internal class CardRenderer(
     ) {
         if (!isInitialized) return
         GLES30.glUseProgram(programIndex)
-        setTextureData()
-        setVertexData()
         setNormalsData(modelMatrix)
         setLightPosition(lightPosition)
         setMVPData(modelMatrix, viewMatrix, projectionMatrix)
 
         GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, renderData.vertexBuffer.capacity() / 3)
+    }
+
+    private fun setLightProperties() {
+        val ambientStrengthHandle = GLES30.glGetUniformLocation(programIndex, "ambientStrength")
+        GLES30.glUniform1f(ambientStrengthHandle, renderData.ambientStrength)
+        val ambientLightColorHandle = GLES30.glGetUniformLocation(programIndex, "ambientLightColor")
+        GLES30.glUniform3fv(ambientLightColorHandle, 1, renderData.ambientLightColor, 0)
+
+        val diffuseStrengthHandle = GLES30.glGetUniformLocation(programIndex, "diffuseStrength")
+        GLES30.glUniform1f(diffuseStrengthHandle, renderData.diffuseStrength)
+        val diffuseLightColorHandle = GLES30.glGetUniformLocation(programIndex, "diffuseLightColor")
+        GLES30.glUniform3fv(diffuseLightColorHandle, 1, renderData.diffuseLightColor, 0)
+
+        val specularMapStrengthHandle =
+            GLES30.glGetUniformLocation(programIndex, "specularMapStrength")
+        GLES30.glUniform1f(specularMapStrengthHandle, renderData.specularMapStrength)
+        val specularMapLightColorHandle =
+            GLES30.glGetUniformLocation(programIndex, "specularMapLightColor")
+        GLES30.glUniform3fv(specularMapLightColorHandle, 1, renderData.specularMapLightColor, 0)
+
+        val specularTextureStrengthHandle =
+            GLES30.glGetUniformLocation(programIndex, "specularTextureStrength")
+        GLES30.glUniform1f(specularTextureStrengthHandle, renderData.specularTextureStrength)
+        val specularTextureLightColorHandle =
+            GLES30.glGetUniformLocation(programIndex, "specularTextureLightColor")
+        GLES30.glUniform3fv(
+            specularTextureLightColorHandle,
+            1,
+            renderData.specularTextureLightColor,
+            0
+        )
     }
 
     private fun setLightPosition(lightPosition: FloatArray) {
@@ -159,5 +198,9 @@ internal class CardRenderer(
             false, 0, renderData.vertexBuffer
         )
         GLES30.glEnableVertexAttribArray(vertexHandler)
+    }
+
+    private companion object {
+        const val TAG = "CardRenderer"
     }
 }

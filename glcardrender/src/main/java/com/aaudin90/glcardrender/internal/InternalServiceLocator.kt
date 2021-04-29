@@ -2,10 +2,8 @@ package com.aaudin90.glcardrender.internal
 
 import android.app.Application
 import com.aaudin90.glcardrender.internal.data.repository.TextureRepository
-import com.aaudin90.glcardrender.internal.data.repository.WavefrontMaterialRepository
 import com.aaudin90.glcardrender.internal.data.repository.WavefrontMeshRepository
 import com.aaudin90.glcardrender.internal.data.source.TextureDataSource
-import com.aaudin90.glcardrender.internal.data.source.WavefrontMaterialDataSource
 import com.aaudin90.glcardrender.internal.data.source.WavefrontMeshDataSource
 import com.aaudin90.glcardrender.internal.domain.FixNormalsMapper
 
@@ -15,12 +13,11 @@ internal class InternalServiceLocator(
     val wavefrontLoader by lazy {
         WavefrontLoader(
             wavefrontDataRepository,
-            textureRepository,
             fixNormalsMapper
         )
     }
 
-    private val textureRepository by lazy {
+    val textureRepository by lazy {
         TextureRepository(
             TextureDataSource(application)
         )
