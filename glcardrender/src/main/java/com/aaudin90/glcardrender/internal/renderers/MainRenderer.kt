@@ -8,18 +8,19 @@ import android.opengl.Matrix
 import com.aaudin90.glcardrender.internal.entity.MeshData
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
-import kotlin.math.sin
 
 internal class MainRenderer(private val context: Context) : GLSurfaceView.Renderer {
-    var y = 0f
-    var x = 0f
-
-    private var angle = 0f
+    var objectRotateX = 0f
+    var objectRotateY = 0f
+    var moveLightX = 0f
+    var moveLightY = 0f
+    var moveLightZ = 0f
+    var drawMicroSun: Boolean = false
+    val lightPosition = floatArrayOf(-10f, 0f, 20f)
 
     private val viewMatrix = FloatArray(16)
     private val modelMatrix = FloatArray(16)
     private val projectionMatrix = FloatArray(16)
-    private val lightPosition = floatArrayOf(-1f, 0f, 3.0f)
 
     private var width: Int = 0
     private var height: Int = 0
@@ -43,7 +44,9 @@ internal class MainRenderer(private val context: Context) : GLSurfaceView.Render
         GLES30.glEnable(GLES20.GL_DEPTH_TEST)
         GLES30.glEnable(GLES20.GL_SCISSOR_TEST)
         cardRenderer?.init(context)
-        microSunRenderer.init(context)
+        if (drawMicroSun) {
+            microSunRenderer.init(context)
+        }
     }
 
     override fun onSurfaceChanged(glUnused: GL10, width: Int, height: Int) {
@@ -63,9 +66,22 @@ internal class MainRenderer(private val context: Context) : GLSurfaceView.Render
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
         GLES30.glEnable(GLES30.GL_DEPTH_TEST)
 
-        angle += .1f
-        lightPosition[1] = sin(angle / 2)
+        val lightPositionToDraw = changeLightPosition()
+        drawCard(lightPositionToDraw)
+        if (drawMicroSun) {
+            drawMicroSun(lightPositionToDraw)
+        }
+    }
 
+    private fun changeLightPosition(): FloatArray {
+        val newLightPosition = FloatArray(3)
+        newLightPosition[0] = lightPosition[0] + moveLightX
+        newLightPosition[1] = lightPosition[1] + moveLightY
+        newLightPosition[2] = lightPosition[2] + moveLightZ
+        return newLightPosition
+    }
+
+    private fun drawCard(lightPositionToDraw: FloatArray) {
         cardRenderer?.apply {
             calculateMatrix()
 
@@ -77,9 +93,11 @@ internal class MainRenderer(private val context: Context) : GLSurfaceView.Render
                 init(context)
             }
 
-            draw(modelMatrix, viewMatrix, projectionMatrix, lightPosition)
+            draw(modelMatrix, viewMatrix, projectionMatrix, lightPositionToDraw)
         }
+    }
 
+    private fun drawMicroSun(lightPositionToDraw: FloatArray) {
         microSunRenderer.apply {
             val sunModelMatrix = FloatArray(16)
             Matrix.setIdentityM(sunModelMatrix, 0)
@@ -89,12 +107,16 @@ internal class MainRenderer(private val context: Context) : GLSurfaceView.Render
                 0,
                 sunModelMatrix,
                 0,
-                lightPosition[0],
-                lightPosition[1],
-                lightPosition[2]
+                lightPositionToDraw[0],
+                lightPositionToDraw[1],
+                lightPositionToDraw[2]
             )
 
             Matrix.scaleM(sunModelMatrix, 0, .2f, .2f, .2f)
+
+            if (!isInitialized) {
+                init(context)
+            }
 
             draw(sunModelMatrix, viewMatrix, projectionMatrix)
         }
@@ -112,8 +134,8 @@ internal class MainRenderer(private val context: Context) : GLSurfaceView.Render
             upX, upY, upZ
         )
 
-        Matrix.rotateM(modelMatrix, 0, -x, 0f, 1f, 0f)
-        Matrix.rotateM(modelMatrix, 0, -y, 1f, 0f, 0f)
+        Matrix.rotateM(modelMatrix, 0, -objectRotateX, 0f, 1f, 0f)
+        Matrix.rotateM(modelMatrix, 0, -objectRotateY, 1f, 0f, 0f)
     }
 
     private fun calculateZ(meshData: MeshData) {

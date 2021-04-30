@@ -61,10 +61,6 @@ internal class CardRenderer(
         }
         // Store the program object
         programIndex = programObject
-        GLES30.glUseProgram(programIndex)
-        setLightProperties()
-        setTextureData()
-        setVertexData()
         isInitialized = true
     }
 
@@ -83,6 +79,9 @@ internal class CardRenderer(
     ) {
         if (!isInitialized) return
         GLES30.glUseProgram(programIndex)
+        setLightProperties()
+        setTextureData()
+        setVertexData()
         setNormalsData(modelMatrix)
         setLightPosition(lightPosition)
         setMVPData(modelMatrix, viewMatrix, projectionMatrix)

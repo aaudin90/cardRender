@@ -3,9 +3,7 @@ package com.aaudin90.glcardrender
 import android.content.Context
 import android.opengl.GLSurfaceView
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
-import android.view.SurfaceHolder
 import com.aaudin90.glcardrender.api.CardModelLoader
 import com.aaudin90.glcardrender.internal.renderers.CardRenderer
 import com.aaudin90.glcardrender.internal.renderers.MainRenderer
@@ -62,6 +60,28 @@ class CardGlSurfaceView(
         }
     }
 
+    fun setLightPosition(x: Float, y: Float, z: Float) {
+        queueEvent {
+            render.lightPosition[0] = x
+            render.lightPosition[1] = y
+            render.lightPosition[2] = z
+        }
+    }
+
+    fun moveLight(x: Float, y: Float, z: Float) {
+        queueEvent {
+            render.moveLightX = x
+            render.moveLightY = y
+            render.moveLightZ = z
+        }
+    }
+
+    fun setDrawMicroSun(flag: Boolean) {
+        queueEvent {
+            render.drawMicroSun = flag
+        }
+    }
+
     override fun onTouchEvent(e: MotionEvent): Boolean {
         // MotionEvent reports input details from the touch screen
         // and other input controls. In this case, you are only
@@ -74,9 +94,9 @@ class CardGlSurfaceView(
                 //subtract, so the cube moves the same direction as your finger.
                 //with plus it moves the opposite direction.
                 render.let {
-                    it.x = (it.x - dx * TOUCH_SCALE_FACTOR)
+                    it.objectRotateX = (it.objectRotateX - dx * TOUCH_SCALE_FACTOR)
                     val dy = y - mPreviousY
-                    it.y = (it.y - dy * TOUCH_SCALE_FACTOR)
+                    it.objectRotateY = (it.objectRotateY - dy * TOUCH_SCALE_FACTOR)
                 }
             }
         }
