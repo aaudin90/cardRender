@@ -1,8 +1,10 @@
 package com.aaudin90.glcardrender
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.opengl.GLSurfaceView
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import com.aaudin90.glcardrender.api.CardModelLoader
 import com.aaudin90.glcardrender.internal.renderers.CardRenderer
@@ -15,8 +17,6 @@ class CardGlSurfaceView(
     attrs: AttributeSet? = null
 ) : GLSurfaceView(context, attrs) {
 
-    private var mPreviousX = 0f
-    private var mPreviousY = 0f
     private var render = MainRenderer(context)
 
     init {
@@ -76,33 +76,17 @@ class CardGlSurfaceView(
         }
     }
 
+    fun rotateObject(x: Float, y: Float) {
+        queueEvent {
+            render.objectRotateX = x
+            render.objectRotateY = y
+        }
+    }
+
     fun setDrawMicroSun(flag: Boolean) {
         queueEvent {
             render.drawMicroSun = flag
         }
-    }
-
-    override fun onTouchEvent(e: MotionEvent): Boolean {
-        // MotionEvent reports input details from the touch screen
-        // and other input controls. In this case, you are only
-        // interested in events where the touch position changed.
-        val x = e.x
-        val y = e.y
-        when (e.action) {
-            MotionEvent.ACTION_MOVE -> {
-                val dx = x - mPreviousX
-                //subtract, so the cube moves the same direction as your finger.
-                //with plus it moves the opposite direction.
-                render.let {
-                    it.objectRotateX = (it.objectRotateX - dx * TOUCH_SCALE_FACTOR)
-                    val dy = y - mPreviousY
-                    it.objectRotateY = (it.objectRotateY - dy * TOUCH_SCALE_FACTOR)
-                }
-            }
-        }
-        mPreviousX = x
-        mPreviousY = y
-        return true
     }
 
     private companion object {

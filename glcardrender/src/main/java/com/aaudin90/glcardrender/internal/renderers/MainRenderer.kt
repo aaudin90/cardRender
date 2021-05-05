@@ -10,13 +10,13 @@ import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
 internal class MainRenderer(private val context: Context) : GLSurfaceView.Renderer {
-    var objectRotateX = 0f
-    var objectRotateY = 0f
-    var moveLightX = 0f
-    var moveLightY = 0f
-    var moveLightZ = 0f
-    var drawMicroSun: Boolean = false
-    val lightPosition = floatArrayOf(-10f, 0f, 20f)
+    internal var objectRotateX = 0f
+    internal var objectRotateY = 0f
+    internal var moveLightX = 0f
+    internal var moveLightY = 0f
+    internal var moveLightZ = 0f
+    internal var drawMicroSun: Boolean = false
+    internal val lightPosition = floatArrayOf(-10f, 0f, 20f)
 
     private val viewMatrix = FloatArray(16)
     private val modelMatrix = FloatArray(16)
@@ -134,8 +134,8 @@ internal class MainRenderer(private val context: Context) : GLSurfaceView.Render
             upX, upY, upZ
         )
 
-        Matrix.rotateM(modelMatrix, 0, -objectRotateX, 0f, 1f, 0f)
-        Matrix.rotateM(modelMatrix, 0, -objectRotateY, 1f, 0f, 0f)
+        Matrix.rotateM(modelMatrix, 0, objectRotateX, 0f, 1f, 0f)
+        Matrix.rotateM(modelMatrix, 0, objectRotateY, 1f, 0f, 0f)
     }
 
     private fun calculateZ(meshData: MeshData) {

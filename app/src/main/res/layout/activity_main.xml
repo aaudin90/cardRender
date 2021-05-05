@@ -6,18 +6,18 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <com.aaudin90.glcardrender.CardGlSurfaceView
-        android:id="@+id/sv1"
+    <com.aaudin90.glcardview.GlCardView
+        android:id="@+id/gl_cv1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <com.aaudin90.glcardrender.CardGlSurfaceView
-        android:id="@+id/sv2"
+    <com.aaudin90.glcardview.GlCardView
+        android:id="@+id/gl_cv2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <com.aaudin90.glcardrender.CardGlSurfaceView
-        android:id="@+id/sv3"
+    <com.aaudin90.glcardview.GlCardView
+        android:id="@+id/gl_cv3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 </LinearLayout>

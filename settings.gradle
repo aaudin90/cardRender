@@ -1,3 +1,4 @@
 include ':glcardrender'
+include ':glcardview'
 include ':app'
 rootProject.name = "GLCardRender"
