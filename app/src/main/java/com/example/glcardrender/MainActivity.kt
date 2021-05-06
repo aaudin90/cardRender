@@ -6,14 +6,12 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.aaudin90.glcardrender.api.CardModelLoader
-import com.aaudin90.glcardview.GlCardView
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var glCardView1: GlCardView
-    private lateinit var glCardView2: GlCardView
-    private lateinit var glCardView3: GlCardView
     private val loader by lazy {
         CardModelLoader(application)
     }
@@ -23,54 +21,91 @@ class MainActivity : AppCompatActivity() {
 
         if (detectOpenGLES30()) {
             setContentView(R.layout.activity_main)
-            glCardView1 = findViewById(R.id.gl_cv1)
-            glCardView2 = findViewById(R.id.gl_cv2)
-            glCardView3 = findViewById(R.id.gl_cv3)
-
-            //glCardView1.cardSurfaceView.setDrawMicroSun(true)
-            glCardView1.cardSurfaceView.setLightPosition(-1f, 0f, 10f)
-            glCardView1.cardSurfaceView.setData3DProvider(
-                loader.Data3DProvider(getBitmap("ural.jpg"))
-            )
-            glCardView2.cardSurfaceView.setLightPosition(-1f, 0f, 10f)
-            glCardView2.cardSurfaceView.setData3DProvider(
-                loader
-                    .Data3DProvider(
-                        getBitmap("podruzhka.png"),
-                        getBitmap("podruzhka_gloss.png"),
-                    )
-            )
-            glCardView3.cardSurfaceView.setData3DProvider(
-                loader
-                    .Data3DProvider(
-                        getBitmap("ural.jpg"),
-                        getBitmap("rivegauch_gloss.png")
-                    )
-            )
+            val rv: RecyclerView = findViewById(R.id.rv)
+            rv.layoutManager = LinearLayoutManager(this).apply {
+                orientation = RecyclerView.VERTICAL
+            }
+            rv.postDelayed({
+                rv.adapter = createAdapter()
+            }, 200)
         } else {
             Log.e("openglcube", "OpenGL ES 3.0 not supported on device.  Exiting...")
             finish()
         }
     }
 
+    private fun createAdapter(): RvAdapter =
+        RvAdapter(
+            listOf(
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.TextItem,
+                RvAdapter.Item.RenderItem(
+                    loader
+                        .Data3DProvider(
+                            getBitmap("podruzhka.png"),
+                            getBitmap("podruzhka_gloss.png"),
+                        )
+                ),
+                RvAdapter.Item.TextItem,
+                RvAdapter.Item.RenderItem(
+                    loader
+                        .Data3DProvider(
+                            getBitmap("ural.jpg"),
+                            getBitmap("rivegauch_gloss.png")
+                        )
+                ),
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.TextItem,
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.TextItem,
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.TextItem,
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.TextItem,
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.TextItem,
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.TextItem,
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.TextItem,
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.TextItem,
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.TextItem,
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.TextItem,
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.TextItem,
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.TextItem,
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.TextItem,
+                RvAdapter.Item.RenderItem(loader.Data3DProvider(getBitmap("ural.jpg"))),
+                RvAdapter.Item.RenderItem(
+                    loader.Data3DProvider(
+                        getBitmap("ural.jpg"),
+                        getBitmap("rivegauch_gloss.png")
+                    )
+                )
+            )
+        )
+
     private fun getBitmap(assetName: String): Bitmap =
         application.assets.open(assetName).use { inputStream ->
             BitmapFactory.decodeStream(inputStream)
         }
-
-    override fun onStart() {
-        super.onStart()
-        glCardView1.onStart()
-        glCardView2.onStart()
-        glCardView3.onStart()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        glCardView1.onStop()
-        glCardView2.onStop()
-        glCardView3.onStop()
-    }
 
     private fun detectOpenGLES30(): Boolean {
         val am = getSystemService(ACTIVITY_SERVICE) as ActivityManager

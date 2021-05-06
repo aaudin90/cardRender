@@ -1,65 +1,15 @@
 package com.aaudin90.glcardrender.internal.renderers
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.opengl.GLES30
 import android.opengl.GLUtils.texImage2D
 import android.opengl.Matrix
 import android.util.Log
 import com.aaudin90.glcardrender.internal.entity.MeshData
-import java.io.InputStream
 import kotlin.math.abs
 
 internal object GLUtil {
     private const val TAG = "GLUtil"
-
-    /**
-     * Helper function to compile and link a program.
-     *
-     * @param vertexShaderHandle   An OpenGL handle to an already-compiled vertex shader.
-     * @param fragmentShaderHandle An OpenGL handle to an already-compiled fragment shader.
-     * @param attributes           Attributes that need to be bound to the program.
-     * @return An OpenGL handle to the program.
-     */
-    fun createAndLinkProgram(
-        vertexShaderHandle: Int, fragmentShaderHandle: Int,
-        attributes: Array<String?>?
-    ): Int {
-        var programHandle: Int = GLES30.glCreateProgram()
-        if (programHandle != 0) {
-            // Bind the vertex shader to the program.
-            GLES30.glAttachShader(programHandle, vertexShaderHandle)
-
-            // Bind the fragment shader to the program.
-            GLES30.glAttachShader(programHandle, fragmentShaderHandle)
-
-            // Bind attributes
-            if (attributes != null) {
-                val size = attributes.size
-                for (i in 0 until size) {
-                    GLES30.glBindAttribLocation(programHandle, i, attributes[i])
-                }
-            }
-
-            // Link the two shaders together into a program.
-            GLES30.glLinkProgram(programHandle)
-
-            // Get the link status.
-            val linkStatus = IntArray(1)
-            GLES30.glGetProgramiv(programHandle, GLES30.GL_LINK_STATUS, linkStatus, 0)
-
-            // If the link failed, delete the program.
-            if (linkStatus[0] == 0) {
-                Log.e(TAG, "Error compiling program: " + GLES30.glGetProgramInfoLog(programHandle))
-                GLES30.glDeleteProgram(programHandle)
-                programHandle = 0
-            }
-        }
-        if (programHandle == 0) {
-            throw RuntimeException("Error creating program.")
-        }
-        return programHandle
-    }
 
     /**
      * Utility method for compiling a OpenGL shader.
@@ -140,29 +90,6 @@ internal object GLUtil {
         return textureHandle[0]
     }
 
-    private fun loadBitmap(bytes: ByteArray): Bitmap {
-        val options: BitmapFactory.Options = BitmapFactory.Options()
-        // By default, Android applies pre-scaling to bitmaps depending on the resolution of your device and which
-        // resource folder you placed the image in. We don’t want Android to scale our bitmap at all, so to be sure,
-        // we set inScaled to false.
-        options.inScaled = false
-
-        // Read in the resource
-        return BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)
-            ?: throw RuntimeException("couldn't load bitmap")
-    }
-
-    private fun loadBitmap(inputStream: InputStream): Bitmap {
-        val options: BitmapFactory.Options = BitmapFactory.Options()
-        // By default, Android applies pre-scaling to bitmaps depending on the resolution of your device and which
-        // resource folder you placed the image in. We don’t want Android to scale our bitmap at all, so to be sure,
-        // we set inScaled to false.
-        options.inScaled = false
-        // Read in the resource
-        return BitmapFactory.decodeStream(inputStream, null, options)
-            ?: throw RuntimeException("couldn't load bitmap")
-    }
-
     /**
      * Utility method for debugging OpenGL calls. Provide the name of the call just after making it:
      *
@@ -186,12 +113,13 @@ internal object GLUtil {
             Log.e(TAG, Thread.currentThread().stackTrace[4].toString())
             Log.e(TAG, Thread.currentThread().stackTrace[5].toString())
             Log.e(TAG, Thread.currentThread().stackTrace[6].toString())
-
-            // throw new RuntimeException(glOperation + ": glError " + error);
         }
         return error
     }
 
+    /**
+     * Проверяет находится ли объект полностью в конусе видимости камеры.
+     */
     fun inFrustum(
         modelMatrix: FloatArray,
         viewMatrix: FloatArray,

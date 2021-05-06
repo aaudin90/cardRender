@@ -36,8 +36,8 @@ internal class MicroSunRenderer {
         val linked = IntArray(1)
         GLES30.glGetProgramiv(programObject, GLES30.GL_LINK_STATUS, linked, 0)
         if (linked[0] == 0) {
-            Log.e("sssss", "Error linking program:")
-            Log.e("sssss", GLES30.glGetProgramInfoLog(programObject))
+            Log.e(LOG_TAG, "Error linking program:")
+            Log.e(LOG_TAG, GLES30.glGetProgramInfoLog(programObject))
             GLES30.glDeleteProgram(programObject)
             throw Exception("Error linking program:")
         }
@@ -131,5 +131,6 @@ internal class MicroSunRenderer {
             -0.5f, 0.5f, 0.5f,
             -0.5f, 0.5f, -0.5f
         )
+        const val LOG_TAG = "MicroSunRenderer"
     }
 }

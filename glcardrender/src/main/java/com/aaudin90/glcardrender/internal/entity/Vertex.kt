@@ -5,7 +5,7 @@ internal data class Vertex(
     val textureIndex: Int = NO_INDEX,
     val normalIndex: Int = NO_INDEX,
     val colorIndex: Int = NO_INDEX
-    //val weightsData: VertexSkinData? = null
+
 ) {
 
     private companion object {

@@ -11,6 +11,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.FrameLayout
@@ -125,7 +126,8 @@ class GlCardView @JvmOverloads constructor(
                     objectRotateY -= dy * TOUCH_SCALE_FACTOR
                     rotateObject()
                 }
-                MotionEvent.ACTION_UP -> {
+                MotionEvent.ACTION_UP,
+                MotionEvent.ACTION_CANCEL -> {
                     val closerX = calculateCloser(objectRotateX, lastCloserXState)
                     val closerY = calculateCloser(objectRotateY, lastCloserYState)
                     animateRotation(objectRotateX, closerX, objectRotateY, closerY)

@@ -16,7 +16,7 @@ internal class MainRenderer(private val context: Context) : GLSurfaceView.Render
     internal var moveLightY = 0f
     internal var moveLightZ = 0f
     internal var drawMicroSun: Boolean = false
-    internal val lightPosition = floatArrayOf(-10f, 0f, 20f)
+    internal val lightPosition = floatArrayOf(-1f, 0f, 10f)
 
     private val viewMatrix = FloatArray(16)
     private val modelMatrix = FloatArray(16)

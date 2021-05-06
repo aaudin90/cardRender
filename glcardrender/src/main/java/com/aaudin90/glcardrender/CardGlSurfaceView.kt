@@ -1,11 +1,8 @@
 package com.aaudin90.glcardrender
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.opengl.GLSurfaceView
 import android.util.AttributeSet
-import android.util.Log
-import android.view.MotionEvent
 import com.aaudin90.glcardrender.api.CardModelLoader
 import com.aaudin90.glcardrender.internal.renderers.CardRenderer
 import com.aaudin90.glcardrender.internal.renderers.MainRenderer
@@ -49,14 +46,23 @@ class CardGlSurfaceView(
     }
 
     fun setData3DProvider(provider: CardModelLoader.Data3DProvider) {
+        releaseRenderer()
+        queueEvent {
+            render.cardRenderer = CardRenderer(provider.getData3D())
+        }
+    }
+
+    fun removeRenderer() {
+        releaseRenderer()
+    }
+
+    private fun releaseRenderer() {
         queueEvent {
             val oldRender = render.cardRenderer
             if (oldRender != null) {
                 oldRender.release()
-                oldRender.renderData.texture?.recycle()
-                oldRender.renderData.specularMap.recycle()
+                render.cardRenderer = null
             }
-            render.cardRenderer = CardRenderer(provider.getData3D())
         }
     }
 
@@ -90,7 +96,6 @@ class CardGlSurfaceView(
     }
 
     private companion object {
-        const val TOUCH_SCALE_FACTOR = 0.1f
         const val CARD_PROPORTION = 1.57f
     }
 }
