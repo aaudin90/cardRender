@@ -25,9 +25,7 @@ class MainActivity : AppCompatActivity() {
             rv.layoutManager = LinearLayoutManager(this).apply {
                 orientation = RecyclerView.VERTICAL
             }
-            rv.postDelayed({
-                rv.adapter = createAdapter()
-            }, 200)
+            rv.adapter = createAdapter()
         } else {
             Log.e("openglcube", "OpenGL ES 3.0 not supported on device.  Exiting...")
             finish()

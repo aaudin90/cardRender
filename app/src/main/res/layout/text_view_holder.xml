@@ -3,9 +3,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="рфрфрфрфывф\n\n\n\n             плрфпфорцк" />
+        android:layout_height="wrap_content">
 
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="рфрфрфрфывф\n\n\n\n             плрфпфорцк" />
+
+        </FrameLayout>
+    </FrameLayout>
 </FrameLayout>
