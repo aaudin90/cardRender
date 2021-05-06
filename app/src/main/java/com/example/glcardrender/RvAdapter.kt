@@ -63,7 +63,6 @@ class RvAdapter(private val list: List<Item>) : RecyclerView.Adapter<RecyclerVie
         }
 
         fun unbind() {
-            glCardView.cardSurfaceView.removeRenderer()
             glCardView.onStop()
         }
     }
